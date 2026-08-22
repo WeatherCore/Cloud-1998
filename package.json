@@ -1,0 +1,16 @@
+{
+  "name": "weathercore-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "WeatherCore 98 - 一台 1998 年的中文复古电脑，桌面即网站",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vite": "^5.4.8"
+  }
+}

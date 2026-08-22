@@ -1,0 +1,191 @@
+/* ============================================================
+   WeatherCore 98 - 全局基础
+   字体策略：界面用系统宋体（Win98 中文版原生字体，零加载），
+   终端/BIOS 用自托管 VT323 像素字体（仅拉丁字符，几十 KB）。
+   ============================================================ */
+
+@font-face {
+  font-family: "VT323";
+  src: url("./fonts/vt323.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Win98 调色板：全局锁定，灰色系 + 藏青标题 + 湖蓝桌面 */
+  --face: #c0c0c0;
+  --face-light: #dfdfdf;
+  --hilight: #ffffff;
+  --shadow: #808080;
+  --dark: #0a0a0a;
+  --title-a: #000080;
+  --title-b: #1084d0;
+  --title-inactive-a: #808080;
+  --title-inactive-b: #b5b5b5;
+  --desktop-teal: #008080;
+  --text: #000000;
+  --text-disabled: #808080;
+
+  --font-ui: "SimSun", "宋体", "NSimSun", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-mono: "VT323", "Courier New", "Nimbus Mono PS", monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: #000;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Win98 全站箭头光标：当年没有手型光标，拟物到底 */
+button,
+a,
+.desktop-icon {
+  cursor: default;
+}
+
+::selection {
+  background: var(--title-a);
+  color: #fff;
+}
+
+img {
+  image-rendering: pixelated;
+}
+
+/* ---------- Win98 立体斜面工具类 ---------- */
+
+/* 凸起（按钮、窗口、面板外框） */
+.bevel-out {
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+/* 按下（按钮激活态） */
+.bevel-pressed {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+}
+
+/* 凹陷（输入框、状态栏格、白色内容区） */
+.bevel-in {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+/* 深凹陷（白色文本区域、列表区域） */
+.bevel-field {
+  background: #fff;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+/* 1px 刻线分隔符 */
+.bevel-sep {
+  height: 0;
+  border-top: 1px solid var(--shadow);
+  border-bottom: 1px solid var(--hilight);
+  margin: 3px 0;
+}
+
+/* ---------- Win98 滚动条 ---------- */
+
+* {
+  scrollbar-color: var(--face) var(--face-light);
+}
+
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(#fff 0% 25%, #c0c0c0 0% 50%) 0 0 / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--face);
+}
+
+/* 滚动条箭头按钮（像素三角用内联 SVG） */
+::-webkit-scrollbar-button:single-button {
+  display: block;
+  height: 16px;
+  width: 16px;
+  background-color: var(--face);
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h1v1h-1zM1 1h5v1h-5zM0 2h7v1H0z' fill='%23000'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v1H0zM1 1h5v1h-5zM3 2h1v1h-1z' fill='%23000'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h1v1h-1zM1 1h1v5H1zM0 3h1v1H0z' fill='%23000'/%3E%3C/svg%3E");
+}
+::-webkit-scrollbar-button:single-button:horizontal:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM2 1h1v5H2zM3 3h1v1H3z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* ---------- 无障碍 ---------- */
+
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+
+/* 尊重系统减少动态设置 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

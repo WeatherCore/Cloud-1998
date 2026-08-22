@@ -1,0 +1,837 @@
+/* ============================================================
+   WeatherCore 98 - 窗口/桌面/任务栏全套拟物组件
+   z-index 刻度（全局约定，勿乱加）：
+     桌面图标 1 | 窗口 100+栈序 | 屏保 8000 | 开机 9000
+     BSOD 9500 | 关机画面 9600 | 右键菜单/开始菜单 6000/5001 | 任务栏 5000
+     云咕咕 50(桌面层)/8600(顶层, 拎起或屏保时) | 咕咕粒子 8600 | 咕咕菜单 8700
+     CRT 通电闪 9700（屏保退场瞬时特效，动画完自删）
+   ============================================================ */
+
+/* ---------- 窗口 ---------- */
+
+.w98-window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--face);
+  padding: 3px;
+  min-width: 200px;
+  min-height: 120px;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--face-light),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--hilight);
+}
+
+.w98-window.flush {
+  padding: 3px;
+}
+
+.w98-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 2px 3px 2px 4px;
+  background: linear-gradient(90deg, var(--title-a), var(--title-b));
+  color: #fff;
+  font-weight: bold;
+  user-select: none;
+  flex: none;
+  touch-action: none;
+}
+
+.w98-window:not(.focused) .w98-titlebar {
+  background: linear-gradient(90deg, var(--title-inactive-a), var(--title-inactive-b));
+  color: #d8d8d8;
+}
+
+.w98-titlebar .title-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.w98-titlebar .title-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-btns {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+.tbtn {
+  width: 16px;
+  height: 14px;
+  border: none;
+  background: var(--face);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.tbtn:active {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+}
+
+.tbtn svg {
+  display: block;
+}
+
+.w98-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.w98-statusbar {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  margin-top: 3px;
+}
+
+.w98-statusbar > span {
+  padding: 2px 6px;
+  font-size: 12px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow);
+}
+
+/* 菜单栏（记事本等） */
+.w98-menubar {
+  display: flex;
+  flex: none;
+  user-select: none;
+  position: relative;
+}
+
+.w98-menubar > button {
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 2px 8px;
+}
+
+.w98-menubar > button.open,
+.w98-menubar > button:hover {
+  background: var(--title-a);
+  color: #fff;
+}
+
+/* 下拉菜单 */
+.w98-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 148px;
+  background: var(--face);
+  padding: 2px;
+  z-index: 30;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--face-light),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--hilight);
+}
+
+.w98-dropdown .dd-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 18px 4px 22px;
+  white-space: nowrap;
+}
+
+.w98-dropdown .dd-item:hover:not(.disabled) {
+  background: var(--title-a);
+  color: #fff;
+}
+
+.w98-dropdown .dd-item.disabled {
+  color: var(--text-disabled);
+  text-shadow: 1px 1px var(--hilight);
+}
+
+/* ---------- 按钮 / 输入框 / 分组框 ---------- */
+
+.w98-btn {
+  min-width: 70px;
+  height: 24px;
+  padding: 0 12px;
+  border: none;
+  background: var(--face);
+  font: inherit;
+  color: var(--text);
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.w98-btn:active:not(:disabled) {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+  padding: 1px 11px 0 13px;
+}
+
+.w98-btn:disabled {
+  color: var(--text-disabled);
+  text-shadow: 1px 1px var(--hilight);
+}
+
+.w98-btn.small {
+  min-width: 0;
+  height: 21px;
+  padding: 0 8px;
+}
+
+.w98-input {
+  border: none;
+  background: #fff;
+  font: inherit;
+  padding: 3px 4px 2px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.w98-group {
+  border: 1px solid var(--shadow);
+  border-right-color: var(--hilight);
+  border-bottom-color: var(--hilight);
+  padding: 10px 12px;
+  position: relative;
+  margin-top: 8px;
+}
+
+.w98-group > legend {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: var(--face);
+  padding: 0 4px;
+}
+
+/* ---------- 桌面 ---------- */
+
+#desktop {
+  position: fixed;
+  inset: 0 0 30px 0;
+  background: var(--desktop-teal);
+  /* 壁纸统一铺法：cover 居中。上传壁纸走内联 backgroundImage，
+     铺法必须落在基础规则里才生效 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* 图标竖排分列，Win98 原生排布 */
+.desktop-icons {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px 6px;
+  height: 100%;
+  padding: 8px 4px;
+}
+
+.desktop-icon {
+  width: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+  padding: 3px 2px;
+}
+
+.desktop-icon .icon-img {
+  width: 34px;
+  height: 34px;
+}
+
+.desktop-icon .icon-label {
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  padding: 1px 4px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+  max-width: 78px;
+  word-break: keep-all;
+}
+
+.desktop-icon.selected .icon-label {
+  background: var(--title-a);
+  text-shadow: none;
+}
+
+.desktop-icon.selected .icon-img {
+  filter: opacity(0.65) drop-shadow(0 0 0 var(--title-a));
+}
+
+/* ---------- 壁纸 ---------- */
+
+body.wp-bliss #desktop {
+  background-color: #6595f0;
+}
+
+body.wp-lake #desktop {
+  background-color: #546d7f;
+}
+
+/* ---------- 任务栏 ---------- */
+
+#taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  background: var(--face);
+  border-top: 1px solid var(--hilight);
+  box-shadow: inset 0 1px var(--face-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 3px;
+  z-index: 5000;
+}
+
+#start-btn {
+  min-width: 0;
+  height: 24px;
+  padding: 0 7px 0 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: bold;
+}
+
+#start-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+#start-btn.on {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+}
+
+.task-btns {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.task-btn {
+  flex: 0 1 160px;
+  min-width: 0;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  border: none;
+  background: var(--face);
+  font: inherit;
+  overflow: hidden;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.task-btn img {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.task-btn span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.task-btn.active {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+  font-weight: bold;
+}
+
+#tray {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  font-size: 12px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow);
+}
+
+/* ---------- 开始菜单 ---------- */
+
+#start-menu {
+  position: fixed;
+  left: 2px;
+  bottom: 32px;
+  width: 210px;
+  background: var(--face);
+  padding: 3px;
+  padding-left: 27px;
+  display: none;
+  z-index: 5001;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--face-light),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--hilight);
+}
+
+#start-menu.open {
+  display: block;
+}
+
+/* 侧边竖排招牌：Win98 开始菜单的标志结构 */
+#start-menu .banner {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  bottom: 3px;
+  width: 24px;
+  background: linear-gradient(180deg, var(--title-a), var(--title-b));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#start-menu .banner span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: #fff;
+  font-weight: bold;
+  font-size: 15px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  padding-bottom: 6px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 8px 5px 4px;
+  user-select: none;
+}
+
+.menu-item img {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+.menu-item span {
+  flex: 1;
+}
+
+.menu-item:hover {
+  background: var(--title-a);
+  color: #fff;
+}
+
+.menu-item.bold span {
+  font-weight: bold;
+}
+
+.menu-sep {
+  margin: 3px 0;
+  border-top: 1px solid var(--shadow);
+  border-bottom: 1px solid var(--hilight);
+}
+
+/* ---------- 右键菜单 ---------- */
+
+#ctx-menu {
+  position: fixed;
+  min-width: 150px;
+  background: var(--face);
+  padding: 2px;
+  display: none;
+  z-index: 6000;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--face-light),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--hilight);
+}
+
+#ctx-menu .menu-item {
+  padding: 4px 16px 4px 8px;
+}
+
+#ctx-menu .menu-item img {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- 消息对话框 ---------- */
+
+.w98-dialog-body {
+  display: flex;
+  gap: 14px;
+  padding: 14px 12px 10px;
+  align-items: flex-start;
+}
+
+.w98-dialog-body .dlg-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.w98-dialog-body .dlg-text {
+  padding-top: 4px;
+  line-height: 1.65;
+  min-width: 180px;
+  word-break: break-all;
+  white-space: pre-line;
+}
+
+.dlg-input {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 0 12px;
+}
+
+.w98-dialog-btns {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0 10px;
+}
+
+/* ---------- 开机画面 ---------- */
+
+#boot {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #c0c0c0;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  line-height: 1.35;
+  padding: 18px 24px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-all;
+  z-index: 9000;
+}
+
+#boot-splash {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9001;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+}
+
+#boot-splash.show {
+  display: flex;
+}
+
+#boot-splash .splash-logo {
+  width: 96px;
+  height: 96px;
+}
+
+#boot-splash .splash-title {
+  color: #fff;
+  font-size: 34px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+#boot-splash .splash-title small {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  font-weight: normal;
+  letter-spacing: 8px;
+  color: #c0c0c0;
+  margin-top: 4px;
+}
+
+#boot-splash .splash-bar {
+  width: 220px;
+  height: 18px;
+  padding: 2px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+  overflow: hidden;
+}
+
+#boot-splash .splash-bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: repeating-linear-gradient(90deg, var(--title-b) 0 13px, transparent 13px 26px);
+  background-color: var(--title-a);
+  animation: splash-slide 1.1s linear infinite;
+}
+
+@keyframes splash-slide {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -52px 0;
+  }
+}
+
+#boot-skip {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  color: #666;
+  font-size: 12px;
+  font-family: var(--font-ui);
+}
+
+/* ---------- BSOD ---------- */
+
+#bsod {
+  position: fixed;
+  inset: 0;
+  background: #0000aa;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  line-height: 1.5;
+  padding: 8vh 10vw;
+  white-space: pre-wrap;
+  z-index: 9500;
+  display: none;
+}
+
+#bsod.show {
+  display: block;
+}
+
+/* ---------- 关机画面 ---------- */
+
+#shutdown {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9600;
+  display: none;
+  place-items: center;
+  text-align: center;
+}
+
+#shutdown.show {
+  display: grid;
+}
+
+#shutdown .sd-text {
+  color: #ffa500;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+#shutdown .sd-hint {
+  color: #555;
+  font-size: 12px;
+  margin-top: 26px;
+}
+
+/* ---------- 屏幕保护 ---------- */
+
+#saver {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 8000;
+  display: none;
+}
+
+#saver.show {
+  display: block;
+}
+
+#saver canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#saver .saver-quote {
+  position: absolute;
+  font-size: 26px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* WebGL 主路径：琥珀磷光像素字，固定在画面下三分之一，打字机浮现 */
+#saver.gl .saver-quote {
+  left: 50%;
+  bottom: 26%;
+  transform: translateX(-50%);
+  max-width: 86vw;
+  white-space: normal;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: normal;
+  font-size: clamp(20px, 2.6vw, 34px);
+  letter-spacing: 1px;
+  color: #ffc17d;
+  text-shadow:
+    0 0 1px #ffd9a8,
+    0 0 8px rgba(255, 170, 80, 0.55),
+    0 0 28px rgba(255, 140, 40, 0.30),
+    0 2px 10px rgba(0, 0, 0, 0.85);
+  opacity: 1;
+  transition: opacity 1.6s ease;
+}
+
+#saver.gl .saver-quote.dim {
+  opacity: 0;
+}
+
+#saver.gl .saver-caret {
+  animation: saver-blink 1s steps(1) infinite;
+}
+
+@keyframes saver-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- 屏保退场：CRT 通电闪 ---------- */
+
+#crt-wake {
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+  pointer-events: none;
+  background: #fff;
+  opacity: 0;
+  animation: crt-wake-flash 0.55s ease-out forwards;
+}
+
+#crt-wake .crt-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 3px;
+  width: 0;
+  background: #fff;
+  box-shadow: 0 0 24px 6px rgba(255, 255, 255, 0.9);
+  transform: translate(-50%, -50%);
+  animation: crt-wake-line 0.4s ease-out forwards;
+}
+
+@keyframes crt-wake-flash {
+  0% {
+    opacity: 0;
+  }
+  7% {
+    opacity: 0.85;
+  }
+  16% {
+    opacity: 0.12;
+  }
+  26% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes crt-wake-line {
+  0% {
+    width: 0;
+    opacity: 1;
+  }
+  35% {
+    width: 92vw;
+    opacity: 0.9;
+  }
+  100% {
+    width: 92vw;
+    opacity: 0;
+  }
+}
+
+/* ---------- 秘籍彩粒子层 ---------- */
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 8500;
+  pointer-events: none;
+  display: none;
+}
+
+#confetti.show {
+  display: block;
+}
+
+#confetti canvas {
+  width: 100%;
+  height: 100%;
+}

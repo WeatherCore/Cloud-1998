@@ -1,0 +1,130 @@
+/* ============================================================
+   云咕咕：桌面宠物鸡
+   贴图集渲染 + 粒子层。桌面层 z 50（在 #desktop 内），拎起/屏保
+   时由 JS 换到 body 并内联 z 8600（星空之上）；所有动作 JS 驱动。
+   ============================================================ */
+
+#gugu {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  z-index: 50;
+  user-select: none;
+  touch-action: none;
+  cursor: default;
+}
+
+/* 粒子层：爱心 / 尘土 / 谷屑 / Z z z / +1 */
+#gugu-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 8600;
+  pointer-events: none;
+}
+
+.gugu-heart {
+  position: absolute;
+}
+
+.gugu-heart img {
+  display: block;
+}
+
+.gugu-dust {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #d8d8d8;
+}
+
+.gugu-bit {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+}
+
+.gugu-zzz {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.gugu-plus {
+  position: absolute;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffff64;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* 蛋：像素编译器画的 egg 图标，可点击收集。
+   z 51：比鸡（50）高一层——妈妈站在蛋上也能点到，收集手感优先 */
+.gugu-egg {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  z-index: 51;
+  cursor: default;
+}
+
+/* 谷粒：撒在地上的一小把 */
+.gugu-grain {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #d8a03c;
+  box-shadow: inset -1px -1px #805020;
+  z-index: 49;
+  pointer-events: none;
+}
+
+/* 小鸡：从蛋里破壳的跟屁虫（不可交互） */
+.gugu-chick {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  z-index: 49;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 鸡自己的右键菜单（复用 .menu-item 皮肤，层级高于星空屏保） */
+#gugu-menu {
+  position: fixed;
+  min-width: 150px;
+  background: var(--face);
+  padding: 2px;
+  z-index: 8700;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--face-light),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--hilight);
+}
+
+#gugu-menu .menu-item {
+  padding: 4px 16px 4px 8px;
+}
+
+#gugu-menu .menu-item img {
+  width: 18px;
+  height: 18px;
+}
+
+#gugu-menu .menu-item.disabled {
+  color: var(--text-disabled);
+  text-shadow: 1px 1px var(--hilight);
+}
+
+#gugu-menu .menu-item.disabled:hover {
+  background: none;
+  color: var(--text-disabled);
+}
