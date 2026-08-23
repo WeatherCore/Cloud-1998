@@ -64,6 +64,30 @@ function build(ctx: AppCtx) {
         print("画板启动。画点什么，然后按「重力」。");
         ctx.open("paint");
         return;
+      case "mine":
+      case "winmine":
+        print(TERMINAL.mineGo);
+        ctx.open("mine");
+        return;
+      case "calc":
+        print(TERMINAL.calcGo);
+        ctx.open("calc");
+        return;
+      case "ie":
+      case "iexplore":
+      case "www":
+        print(TERMINAL.ieGo);
+        ctx.open("ie");
+        return;
+      case "ach":
+      case "achievements":
+        print("打开成就室。看看你解锁了多少。");
+        ctx.open("ach");
+        return;
+      case "xyzzy":
+        /* 咒语要在对的地方念才灵 */
+        print(TERMINAL.xyzzy);
+        return;
       case "chicken": {
         /* 隐藏子命令：chicken feed 喂食 / chicken bye 放生 / chicken info 属性 */
         const sub = (args[0] ?? "").toLowerCase();
