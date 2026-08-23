@@ -3,6 +3,7 @@ import "./styles/win98.css";
 import "./styles/apps.css";
 import "./styles/gugu.css";
 import { APPS } from "./apps";
+import { initAchievements } from "./core/achievements";
 import { runBoot } from "./core/boot";
 import { initGugu } from "./core/chicken";
 import { initKonami } from "./core/konami";
@@ -22,4 +23,5 @@ runBoot(() => {
   initSaver();
   initKonami();
   initGugu();
+  initAchievements();
 });
