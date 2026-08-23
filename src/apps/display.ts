@@ -8,6 +8,7 @@ import { showBalloon } from "../core/shell";
 import {
   addUserWallpaper,
   applyWallpaper,
+  BUILT_INS,
   currentWallpaperId,
   deleteUserWallpaper,
   listWallpapers,
@@ -55,7 +56,7 @@ export const displayApp: AppDef = {
       } else {
         let u = previewURLs.get(it.id);
         if (!u) {
-          const blob = await wallpaperBlob(it.id);
+          const blob = await wallpaperBlob(it.id).catch(() => undefined);
           if (!blob) return;
           u = URL.createObjectURL(blob);
           previewURLs.set(it.id, u);
@@ -66,7 +67,12 @@ export const displayApp: AppDef = {
     };
 
     const refresh = async () => {
-      items = await listWallpapers();
+      try {
+        items = await listWallpapers();
+      } catch {
+        /* IndexedDB 不可用（部分隐身模式/webview）：退回内建壁纸 */
+        items = [...BUILT_INS];
+      }
       list.textContent = "";
       if (!items.some((i) => i.id === selected)) selected = "bliss";
       items.forEach((it) => {
