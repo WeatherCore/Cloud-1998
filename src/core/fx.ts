@@ -1,11 +1,13 @@
 /* 全屏特效：蓝屏 / 关机画面 / 像素雨 */
 
 import { BSOD_TEXT, SHUTDOWN_HINT, SHUTDOWN_TEXT } from "./content";
-import { el, reducedMotion } from "./util";
+import { stats } from "./stats";
+import { el, reducedMotion, store } from "./util";
 import { wm } from "./wm";
 
 /** 蓝屏。任意键或点击后执行一次完整的重新开机 */
 export function showBSOD() {
+  stats.once("egg.bsod");
   document.getElementById("bsod")?.remove();
   const b = el("div");
   b.id = "bsod";
@@ -14,7 +16,7 @@ export function showBSOD() {
   document.body.appendChild(b);
 
   const dismiss = () => {
-    localStorage.removeItem("wc98-booted");
+    store.remove("wc98-booted");
     location.reload();
   };
   /* 延迟绑定，避免触发蓝屏的那次按键顺手把它关掉 */
@@ -35,7 +37,7 @@ export function showShutdown() {
   document.body.appendChild(s);
   setTimeout(() => {
     s.addEventListener("pointerdown", () => {
-      localStorage.removeItem("wc98-booted");
+      store.remove("wc98-booted");
       location.reload();
     });
   }, 500);
