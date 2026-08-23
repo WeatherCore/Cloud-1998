@@ -3,7 +3,8 @@
    （localStorage 只有 5MB，放照片两三张就爆，故用 IndexedDB）
    ============================================================ */
 
-import { $ } from "./util";
+import { stats } from "./stats";
+import { $, store } from "./util";
 
 export interface WallpaperMeta {
   id: string;
@@ -149,7 +150,7 @@ export async function wallpaperBlob(
 let liveURL: string | null = null;
 
 export function currentWallpaperId(): string {
-  return localStorage.getItem(STORE_KEY) ?? "bliss";
+  return store.get(STORE_KEY) ?? "bliss";
 }
 
 /** 应用壁纸；用户壁纸记录丢失时自动回退草原。返回实际生效的 id。 */
@@ -161,7 +162,8 @@ export async function applyWallpaper(id: string): Promise<string> {
     document.body.classList.add(`wp-${id}`);
     /* 内建壁纸背景也走 BASE_URL，避免 CSS 硬编码绝对路径导致子路径部署 404 */
     desktop.style.backgroundImage = `url("${import.meta.env.BASE_URL}wallpapers/${id}.webp")`;
-    localStorage.setItem(STORE_KEY, id);
+    store.set(STORE_KEY, id);
+    if (!restoring) stats.once("wallpaper.set");
     return id;
   }
   const blob = await userBlob(id).catch(() => undefined);
@@ -169,10 +171,17 @@ export async function applyWallpaper(id: string): Promise<string> {
   if (liveURL) URL.revokeObjectURL(liveURL);
   liveURL = URL.createObjectURL(blob);
   desktop.style.backgroundImage = `url("${liveURL}")`;
-  localStorage.setItem(STORE_KEY, id);
+  store.set(STORE_KEY, id);
+  if (!restoring) stats.once("wallpaper.set");
   return id;
 }
 
+/* 开机恢复壁纸不算「换壁纸」：只有用户亲手换的才记成就 */
+let restoring = false;
+
 export function restoreWallpaper() {
-  applyWallpaper(currentWallpaperId()).catch(() => applyWallpaper("bliss"));
+  restoring = true;
+  applyWallpaper(currentWallpaperId())
+    .catch(() => applyWallpaper("bliss"))
+    .finally(() => (restoring = false));
 }
