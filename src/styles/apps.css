@@ -787,3 +787,1037 @@ body.mode-mobile .w98-dialog-body .dlg-text {
   color: #404040;
   padding: 2px 4px;
 }
+
+/* ---------- 扫雷 ---------- */
+
+.mine-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+.mine-panel {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.mine-led {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  line-height: 1;
+  color: #ff2020;
+  background: #000;
+  padding: 3px 4px 1px;
+  letter-spacing: 2px;
+  min-width: 52px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.mine-face {
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: var(--face);
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.mine-face:active {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+}
+
+.mine-board {
+  flex: none;
+  margin: 0 auto;
+  display: grid;
+  padding: 3px;
+  background: var(--face);
+  touch-action: manipulation;
+  user-select: none;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.mine-cell {
+  position: relative;
+  width: var(--cell, 16px);
+  height: var(--cell, 16px);
+  display: grid;
+  place-items: center;
+  background: var(--face);
+  font: bold 13px var(--font-ui);
+  cursor: default;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.mine-cell.open {
+  box-shadow: inset 1px 1px var(--shadow);
+}
+
+.mine-cell.boom {
+  background: #ff0000;
+}
+
+.mine-cell.wrong::after {
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ff0000;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.mine-pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  display: none;
+  z-index: 9;
+}
+
+.mine-pixel.on {
+  display: block;
+}
+
+.mine-help {
+  flex: none;
+  font-size: 12px;
+  text-align: center;
+  color: #202020;
+}
+
+/* ---------- 计算器 ---------- */
+
+.calc-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.calc-display {
+  flex: none;
+  height: 38px;
+  box-sizing: border-box;
+  background: #fff;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  padding: 5px 8px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.calc-display.error {
+  color: #a00000;
+  font-size: 15px;
+  font-family: var(--font-ui);
+}
+
+.calc-display.flip {
+  transform: rotate(180deg);
+}
+
+/* 算式太长时换小号字，右对齐裁掉最左边 */
+.calc-display.long {
+  font-size: 17px;
+  padding-top: 10px;
+}
+
+.calc-keys {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.calc-key {
+  border: none;
+  background: var(--face);
+  font: 15px var(--font-ui);
+  color: #000080;
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.calc-key:active {
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--dark),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--shadow);
+}
+
+.calc-key.k-red {
+  color: #800000;
+}
+
+.calc-key.k-eq {
+  font-weight: bold;
+}
+
+/* ---------- 我的浏览器 ---------- */
+
+.ie-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ie-toolbar {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 3px 6px;
+  align-items: center;
+}
+
+.ie-tb-btn {
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font: 11px var(--font-ui);
+  color: #222;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+
+.ie-tb-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ie-tb-btn:not(:disabled):hover {
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light);
+}
+
+.ie-addrbar {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0 6px 5px;
+}
+
+.ie-addr-label {
+  font-size: 12px;
+  flex: none;
+}
+
+.ie-addr {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.ie-content {
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  padding: 16px 22px;
+  margin: 0 6px;
+  font-family: "Times New Roman", "SimSun", "宋体", serif;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #000;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.ie-statusbar {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 4px 3px 8px;
+  gap: 8px;
+}
+
+.ie-status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ie-zone {
+  flex: none;
+  padding: 0 8px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow);
+}
+
+/* ---------- 网页内容（1998 风格） ---------- */
+
+.web-link {
+  color: #0000ee;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.web-link:hover {
+  color: #dd0000;
+}
+
+.web-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+
+.web-dim {
+  color: #808080;
+  font-size: 12px;
+}
+
+.web-marquee {
+  overflow: hidden;
+  background: #ffffcc;
+  border: 1px solid #808080;
+  margin: 8px 0;
+  white-space: nowrap;
+}
+
+.web-marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: web-marquee 16s linear infinite;
+}
+
+@keyframes web-marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.web-counter {
+  display: inline-flex;
+  gap: 1px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.web-counter i {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.2;
+  background: #000;
+  color: #40ff40;
+  padding: 1px 3px 0;
+}
+
+.web-nav-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.web-nav-logo {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: #000080;
+  color: #ffff00;
+  font: bold 26px var(--font-ui);
+}
+
+.web-nav-title {
+  font-size: 26px;
+  color: #cc0000;
+}
+
+.web-nav-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.web-nav-cat {
+  border: 1px solid #808080;
+  background: #f8f8f0;
+  padding: 8px 12px;
+}
+
+.web-nav-cat-title {
+  font-weight: bold;
+  color: #000080;
+  border-bottom: 1px dashed #999;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+}
+
+.web-nav-item {
+  margin: 6px 0;
+}
+
+.web-nav-desc {
+  margin-left: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.web-home-title {
+  text-align: center;
+  font-size: 24px;
+  color: #cc0000;
+  margin: 2px 0 6px;
+}
+
+.web-construct {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 2px dashed #ff8000;
+  background: #ffffe8;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+.web-hr {
+  border: none;
+  border-top: 1px solid #999;
+  margin: 12px 0;
+}
+
+.web-sec-title {
+  font-weight: bold;
+  color: #000080;
+  margin: 10px 0 4px;
+}
+
+.web-sec p {
+  margin: 4px 0;
+}
+
+.web-table {
+  border-collapse: collapse;
+}
+
+.web-table td {
+  border: 1px solid #808080;
+  padding: 3px 16px;
+}
+
+.web-table .web-k {
+  background: #e8e8f8;
+}
+
+.web-motto {
+  color: #800000;
+  font-style: italic;
+}
+
+.web-counter-row {
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.web-flinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.web-foot {
+  margin-top: 14px;
+  color: #808080;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 留言板 */
+
+.web-gb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+  max-width: 460px;
+}
+
+.web-gb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.web-gb-nick {
+  width: 160px;
+}
+
+.web-gb-text {
+  width: 100%;
+  box-sizing: border-box;
+  height: 58px;
+  resize: none;
+  font: 13px var(--font-ui);
+}
+
+.web-gb-list {
+  margin-top: 8px;
+}
+
+.web-gb-post {
+  border-bottom: 1px dotted #999;
+  padding: 8px 2px;
+}
+
+.web-gb-post.mine {
+  background: #fffff0;
+}
+
+.web-gb-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.web-gb-date {
+  color: #808080;
+  font-size: 12px;
+}
+
+.web-gb-text-row {
+  margin-top: 3px;
+}
+
+/* 搜一搜 */
+
+.web-search-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.web-search-logo {
+  font-size: 28px;
+  color: #0000c0;
+  font-family: var(--font-ui);
+}
+
+.web-search-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.web-search-input {
+  flex: 1;
+  max-width: 380px;
+}
+
+.web-hit {
+  margin: 12px 0;
+}
+
+.web-hit-url {
+  color: #008000;
+  font-size: 12px;
+}
+
+.web-hit-snippet {
+  font-size: 13px;
+  color: #333;
+}
+
+/* 新闻中心 */
+
+.web-news-head {
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+}
+
+.web-news-masthead {
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  font-family: var(--font-ui);
+}
+
+.web-news-dateline {
+  margin: 4px 0;
+}
+
+.web-news-paper {
+  margin-top: 10px;
+}
+
+.web-news-item {
+  padding: 8px 0;
+  border-bottom: 1px dotted #aaa;
+}
+
+.web-news-title-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.web-news-fake {
+  color: #fff;
+  background: #cc0000;
+  font-style: normal;
+  font-size: 11px;
+  padding: 0 4px;
+}
+
+.web-news-body {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #333;
+}
+
+/* 打不开的页面 */
+
+.web-error {
+  max-width: 520px;
+  margin: 30px auto;
+}
+
+.web-error h1 {
+  font-size: 18px;
+  margin-bottom: 14px;
+  font-family: var(--font-ui);
+}
+
+.web-error p {
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.web-dialing {
+  white-space: pre-wrap;
+  text-align: center;
+  color: #606060;
+  padding: 48px 0;
+}
+
+/* 跑马灯与翻转尊重「减少动态效果」 */
+
+@media (prefers-reduced-motion: reduce) {
+  .web-marquee span {
+    animation: none;
+    padding-left: 0;
+  }
+
+  .calc-display.flip {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   成就系统：Steam 式滑入通知 + 成就页
+   ============================================================ */
+
+/* ---------- 右下角滑入通知（Win98 浮雕小窗） ---------- */
+
+.ach-toast {
+  position: fixed;
+  right: 10px;
+  bottom: 40px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 230px;
+  max-width: 300px;
+  padding: 9px 12px;
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light),
+    2px 2px 5px rgba(0, 0, 0, 0.35);
+  z-index: 9500;
+  transform: translateX(calc(100% + 26px));
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.ach-toast.in {
+  transform: translateX(0);
+}
+
+.ach-toast-icon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.ach-toast-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ach-toast-text b {
+  font-size: 12px;
+  color: #000080;
+}
+
+.ach-toast-text span {
+  font-size: 13px;
+  white-space: pre-line;
+}
+
+/* ---------- 成就页 ---------- */
+
+.ach-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.ach-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ach-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+}
+
+/* 进度格：一格一个成就，Win98 味的方块进度条 */
+.ach-segs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 120px;
+  padding: 2px;
+  background: var(--face);
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.ach-segs i {
+  width: 10px;
+  height: 12px;
+  background: var(--shadow);
+}
+
+.ach-segs i.on {
+  background: linear-gradient(180deg, var(--title-a), var(--title-b));
+}
+
+.ach-count {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.ach-list {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  padding: 6px;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.ach-card {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 6px;
+  border-bottom: 1px dotted #d8d8d8;
+}
+
+.ach-card.locked {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.ach-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  box-shadow:
+    inset -1px -1px var(--hilight),
+    inset 1px 1px var(--shadow),
+    inset -2px -2px var(--face-light),
+    inset 2px 2px var(--dark);
+}
+
+.ach-mid {
+  min-width: 0;
+  flex: 1;
+}
+
+.ach-name {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.ach-desc {
+  font-size: 12px;
+  color: #606060;
+  margin-top: 1px;
+}
+
+.ach-date {
+  flex: none;
+  font-size: 11px;
+  color: #808080;
+}
+
+/* 成就通知滑入尊重「减少动态效果」 */
+
+@media (prefers-reduced-motion: reduce) {
+  .ach-toast {
+    transition: none;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================
+   窗口八向缩放手柄 / 任务栏托盘 / 时钟日历
+   ============================================================ */
+
+.w98-rz {
+  position: absolute;
+  z-index: 3;
+}
+
+.rz-n {
+  top: -2px;
+  left: 8px;
+  right: 8px;
+  height: 5px;
+  cursor: n-resize;
+}
+
+.rz-s {
+  bottom: -2px;
+  left: 8px;
+  right: 8px;
+  height: 5px;
+  cursor: s-resize;
+}
+
+.rz-e {
+  right: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  cursor: e-resize;
+}
+
+.rz-w {
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  cursor: w-resize;
+}
+
+.rz-ne {
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  cursor: ne-resize;
+}
+
+.rz-nw {
+  top: -2px;
+  left: -2px;
+  width: 10px;
+  height: 10px;
+  cursor: nw-resize;
+}
+
+.rz-se {
+  bottom: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  cursor: se-resize;
+}
+
+.rz-sw {
+  bottom: -2px;
+  left: -2px;
+  width: 10px;
+  height: 10px;
+  cursor: sw-resize;
+}
+
+.w98-window.maximized .w98-rz {
+  display: none;
+}
+
+/* ---------- 托盘图标 ---------- */
+
+.tray-icon {
+  border: none;
+  background: transparent;
+  height: 20px;
+  min-width: 24px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  font: 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.tray-ime {
+  color: #000080;
+  font-weight: bold;
+}
+
+.tray-icon:hover {
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight);
+}
+
+#clock {
+  cursor: pointer;
+}
+
+/* ---------- 时钟日历弹窗 ---------- */
+
+#clock-cal {
+  position: fixed;
+  right: 6px;
+  bottom: 36px;
+  background: var(--face);
+  padding: 8px 10px;
+  z-index: 5100;
+  box-shadow:
+    inset -1px -1px var(--dark),
+    inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow),
+    inset 2px 2px var(--face-light),
+    2px 2px 5px rgba(0, 0, 0, 0.35);
+  font: 12px var(--font-ui);
+}
+
+#clock-cal .cal-title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+#clock-cal table {
+  border-collapse: collapse;
+}
+
+#clock-cal th {
+  font-weight: normal;
+  color: #404040;
+  padding: 2px 5px;
+}
+
+#clock-cal td {
+  text-align: center;
+  padding: 2px 5px;
+  min-width: 22px;
+}
+
+#clock-cal td.blank {
+  visibility: hidden;
+}
+
+#clock-cal td.today {
+  background: var(--title-a);
+  color: #fff;
+}
