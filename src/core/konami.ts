@@ -2,6 +2,7 @@
 
 import { DIALOGS } from "./content";
 import { confetti } from "./fx";
+import { stats } from "./stats";
 import { wm } from "./wm";
 
 const SEQ = [
@@ -24,6 +25,7 @@ export function initKonami() {
       idx++;
       if (idx === SEQ.length) {
         idx = 0;
+        stats.once("egg.konami");
         confetti();
         wm.msgBox("秘籍", DIALOGS.konami, "info");
       }
