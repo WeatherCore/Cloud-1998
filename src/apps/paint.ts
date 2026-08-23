@@ -1,6 +1,7 @@
 /* 画板：画笔/橡皮/十六色 + 手写物理引擎彩蛋（把画掉下去） */
 
 import type { AppCtx, AppDef } from "../core/types";
+import { stats } from "../core/stats";
 import { el } from "../core/util";
 import { PAINT_COLORS } from "../ui/pixel";
 
@@ -81,6 +82,7 @@ function build({ body }: AppCtx) {
   const gravityBtn = el("button", "w98-btn small gravity-btn", "重力");
   gravityBtn.type = "button";
   gravityBtn.addEventListener("click", () => {
+    stats.once("paint.gravity");
     if (physicsOn) {
       stopPhysics();
       g.fillStyle = "#ffffff";
