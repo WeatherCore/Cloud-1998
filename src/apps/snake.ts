@@ -2,7 +2,8 @@
 
 import type { AppCtx, AppDef } from "../core/types";
 import { DIALOGS } from "../core/content";
-import { el } from "../core/util";
+import { stats } from "../core/stats";
+import { el, store } from "../core/util";
 import { wm } from "../core/wm";
 
 const COLS = 22;
@@ -29,7 +30,7 @@ function build(ctx: AppCtx) {
   let pending = { x: 1, y: 0 };
   let food = { x: 0, y: 0 };
   let score = 0;
-  let best = Number(localStorage.getItem(BEST_KEY) ?? 0);
+  let best = Number(store.get(BEST_KEY) ?? 0);
   let timer: number | undefined;
   let started = false;
   let alive = true;
@@ -76,10 +77,13 @@ function build(ctx: AppCtx) {
     alive = false;
     started = false;
     clearInterval(timer);
+    /* 成就埋点：分数门槛 */
+    if (score >= 10) stats.once("snake.score10");
+    if (score >= 30) stats.once("snake.score30");
     const isRecord = score > best;
     if (isRecord) {
       best = score;
-      localStorage.setItem(BEST_KEY, String(best));
+      store.set(BEST_KEY, String(best));
     }
     updateInfo();
     wm.msgBox("贪吃蛇", DIALOGS.snakeOver(score, best), isRecord ? "info" : "warn");
