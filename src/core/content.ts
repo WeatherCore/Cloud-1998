@@ -93,6 +93,10 @@ export const TERMINAL = {
     "  about     关于这台电脑的主人",
     "  ls        列出 C:\\ 目录",
     "  github    打开「我的电脑」查看 GitHub 数据",
+    "  mine      打开扫雷",
+    "  calc      打开计算器",
+    "  ie        打开我的浏览器",
+    "  ach       打开成就",
     "  snake     打开贪吃蛇",
     "  paint     打开画板",
     "  quote     抽一句今日签名",
@@ -106,8 +110,11 @@ export const TERMINAL = {
   lsResult: [
     " C:\\ 的目录",
     "ABOUT     <DIR>     关于我",
+    "CALC      EXE       计算器",
     "DOCS      <DIR>     我的项目",
     "GITHUB    <DIR>     我的数据",
+    "IEXPLORE  EXE       我的浏览器",
+    "MINE      EXE       扫雷",
     "QUOTES    TXT     20 条励志签名",
     "SECRETS   <DIR>     你猜",
     "TODO      TXT     永远在更新",
@@ -117,6 +124,10 @@ export const TERMINAL = {
   starsNo: "检测到「减少动态效果」：星空引擎尊重这个设置，保持熄火。",
   guguFeed: "撒下一把谷粒。云咕咕已经在盯着了。",
   guguBye: "云咕咕朝屏幕边缘走去。输入 chicken 召回它。",
+  mineGo: "扫雷启动。祝手脚利索。",
+  calcGo: "计算器启动。数字很老实，逗号不老实。",
+  ieGo: "正在拨号连接 163 ... 猫已就绪。\n（其实这台电脑根本没插电话线，但你别拆穿）",
+  xyzzy: "什么也没有发生。\n（有些咒语，要在对的地方念才灵。）",
   forbidden: "权限不足：只有主任程序员才能这么做。（提示：试试 sudo rm -rf /）",
   deleting: [
     "正在删除 C:\\Windows ...",
@@ -295,3 +306,367 @@ export const PROJECTS: Project[] = [
 /* 关机画面 */
 export const SHUTDOWN_TEXT = "现在可以安全地关闭计算机了";
 export const SHUTDOWN_HINT = "（点击屏幕重新开机）";
+
+/* ============================================================
+   成就系统：全部成就定义（引擎在 core/achievements.ts，页面在 apps/ach.ts）
+   icon   像素图标名（见 ui/pixel.ts）
+   hidden 未解锁时在成就页显示 ???（Steam 隐藏成就）
+   ------------------------------------------------------------
+   今后加成就只需三步（不用动引擎）：
+   1. 这里加一条定义
+   2. achievements.ts 的 RULES 加一行判定（读 stats 计数器）
+   3. 对应程序里 stats.bump("key") / stats.once("egg.xxx") 埋点
+   ============================================================ */
+
+export interface AchDef {
+  id: string;
+  name: string;
+  desc: string;
+  icon: string;
+  hidden?: boolean;
+}
+
+export const ACHIEVEMENTS: AchDef[] = [
+  /* ---- 彩蛋猎人（隐藏） ---- */
+  { id: "xyzzy", name: "祖传咒语", desc: "在扫雷里念对了那句 1992 年的咒语", icon: "mine", hidden: true },
+  { id: "div0", name: "宇宙的拒绝", desc: "除以零，并被宇宙礼貌地拒绝", icon: "calc", hidden: true },
+  { id: "e5318008", name: "倒过来看看", desc: "有些数字，倒过来看别有深意", icon: "calc", hidden: true },
+  { id: "equals10", name: "打破砂锅", desc: "连按了十次等号，问到了底", icon: "calc", hidden: true },
+  { id: "search", name: "搜一搜，不知道", desc: "找到了藏在导航角落的搜索引擎", icon: "globe", hidden: true },
+  { id: "news", name: "旧闻记者", desc: "读完了 1998 年的新闻，真的和假的", icon: "text", hidden: true },
+  { id: "p404", name: "此路不通", desc: "撞上了经典的「该页无法显示」", icon: "warn", hidden: true },
+  { id: "offline", name: "猫的挣扎", desc: "拨号了，但这台电脑没插电话线", icon: "globe", hidden: true },
+  { id: "soundcard", name: "声卡基金", desc: "关心了一下站长的声卡基金余额", icon: "info", hidden: true },
+  { id: "mail", name: "信鸽培训中", desc: "试着给站长写了一封信", icon: "text", hidden: true },
+  { id: "konami", name: "你是老玩家", desc: "上上下下左右左右 BA", icon: "logo", hidden: true },
+  { id: "bsod", name: "蓝屏幸存者", desc: "见识了 0E 异常，并活了下来", icon: "computer", hidden: true },
+  /* ---- 游戏里程碑 ---- */
+  { id: "snake10", name: "小蛇初长成", desc: "贪吃蛇单局拿到 10 分", icon: "snake" },
+  { id: "snake30", name: "蛇中赤兔", desc: "贪吃蛇单局拿到 30 分", icon: "snake" },
+  { id: "mineB", name: "雷区新兵", desc: "扫雷初级首次清场", icon: "mine" },
+  { id: "mineI", name: "工兵证书", desc: "扫雷中级首次清场", icon: "mine" },
+  { id: "mineE", name: "拆弹专家", desc: "扫雷高级首次清场", icon: "mine" },
+  /* ---- 咕咕亲密度 ---- */
+  { id: "egg1", name: "第一颗蛋", desc: "收藏了云咕咕的第一颗蛋", icon: "egg" },
+  { id: "egg10", name: "产能惊人", desc: "第 10 颗蛋，系统开始注意这只鸡", icon: "egg" },
+  { id: "hatch", name: "新手妈妈", desc: "见证一只小鸡破壳", icon: "egg" },
+  { id: "kick", name: "轻轻一甩", desc: "你踢了它……但它原谅你了", icon: "heart" },
+  /* ---- 冲浪痕迹 & 生活情趣 ---- */
+  { id: "surf", name: "冲浪冠军", desc: "走遍内联网的全部五个页面", icon: "globe" },
+  { id: "guestbook", name: "文明上网", desc: "在留言板留下了脚印", icon: "text" },
+  { id: "wallpaper", name: "换换心情", desc: "给桌面换了一张壁纸", icon: "floppy" },
+  { id: "gravity", name: "万有引力", desc: "让一幅画自由落体", icon: "paint" },
+];
+
+export const ACH = {
+  appName: "成就",
+  toastTitle: "成就解锁",
+  retroTitle: "历史战绩",
+  retro: (n: number) => `检测到 1998 年的历史战绩\n补发 ${n} 个成就`,
+  progress: (n: number, total: number) => `${n} / ${total}`,
+  lockedName: "？？？",
+  lockedDesc: "继续探索……",
+  unlockedAt: (d: string) => `${d} 解锁`,
+  soundOn: "音效：开",
+  soundOff: "音效：关",
+  reset: "重置",
+  resetTitle: "清零所有成就与统计计数（调试用）",
+  resetConfirm: "确定要清零所有成就吗？\n\n统计计数会一起清空（不清零的话，旧战绩会立刻把成就补发回来）。此操作不可恢复。",
+  resetDone: "已清零。\n所有成就回到未解锁，像 1998 年刚开机一样。",
+  about: "成就系统 v1.0\n\n每一声叮咚，\n都是对探索精神的表扬。\n\n（有 12 个成就是隐藏的）",
+};
+
+/* 任务栏托盘与时钟日历 */
+export const TRAY = {
+  ime: "输入法（装饰）",
+  mute: "静音",
+  unmute: "取消静音",
+  calWeek: ["日", "一", "二", "三", "四", "五", "六"],
+  calTitle: (y: number, m: number) => `${y}年${m}月`,
+};
+
+/* ============================================================
+   扫雷：三级固定难度，彩蛋是 1992 年传下来的那串咒语
+   ============================================================ */
+
+export interface MineLevel {
+  key: string;
+  label: string;
+  cols: number;
+  rows: number;
+  mines: number;
+}
+
+export const MINE_LEVELS: MineLevel[] = [
+  { key: "beginner", label: "初级", cols: 9, rows: 9, mines: 10 },
+  { key: "intermediate", label: "中级", cols: 16, rows: 16, mines: 40 },
+  { key: "expert", label: "高级", cols: 30, rows: 16, mines: 99 },
+];
+
+export const MINE = {
+  helpDesktop: "左键翻开 · 右键插旗/问号 · 数字上双击弦奏 · F2 新局",
+  helpMobile: "点按翻开 · 长按插旗",
+  about:
+    "扫雷（云端1998 版）\n\n自 1992 年起陪每一台 Windows 值班。\n窗口左上角的像素从不说谎。",
+  win: (label: string, time: number) =>
+    `${label}难度，${time} 秒清场。\n雷区已经把你的名字记在小本本上。`,
+  winRecord: (label: string, time: number) =>
+    `新纪录！${label}难度 ${time} 秒。\n上一任纪录保持者（也是你）表示服气。`,
+  lose: "轰。\n雷区不相信眼泪，但相信再来一局。",
+  bestTitle: "最快纪录",
+  bestEmpty: "还没有任何纪录。\n雷区静悄悄地等你。",
+  bestRow: (label: string, time: number) => `${label}：${time} 秒`,
+  cheatHint: "窗口的角落多了一个像素。它知道一些事情。",
+};
+
+/* ============================================================
+   计算器：Win98 标准型。数字键下面埋了几个笑话。
+   ============================================================ */
+
+export const CALC = {
+  errDiv0: "无法除以零",
+  errOverflow: "溢出",
+  div0Egg:
+    "你不能除以零。\n这个问题 1998 年没解决，现在也没解决。\n宇宙刚刚拒绝了这次请求。",
+  e5318008:
+    "……你是故意的吧。\n把窗口倒过来再看看显示屏。\n这个梗可能比你的岁数都大。",
+  equalsStreak: [
+    "还在按？",
+    "结果真的不会再变了。",
+    "再按也不会变出钱来。",
+    "好吧，送你一个终极答案：42",
+    "……",
+    "你赢了，你是这台计算器的主人。",
+    "（计算器开始思考鸡生蛋蛋生鸡）",
+    "再按下去，我只能重启 1998 年了。",
+  ],
+  copied: "已复制到剪贴板。\n（1998 年，「复制粘贴」还算个手艺）",
+  about:
+    "计算器（标准型）\n\n科学型要等 1999 年才发布。\n数字很老实，彩蛋不老实。",
+  sciLocked: "科学型\n\n抱歉，科学型随 Office 2000 一起发布。\n（也就是说：遥遥无期）",
+};
+
+/* ============================================================
+   我的浏览器：一张 1998 年的仿真内联网
+   整个「互联网」都住在这台电脑里，不联任何真实网络。
+   ============================================================ */
+
+export const WEB = {
+  appName: "我的浏览器",
+  statusDone: "完成",
+  opening: (url: string) => `正在打开页面 ${url} ...`,
+  connecting: (url: string) => `正在连接 ${url} ...`,
+  dialing: "正在拨号：163 ...",
+
+  /* ---- 云端导航（首页） ---- */
+  nav: {
+    url: "cloud1998.yes",
+    title: "云端导航 - 上网冲浪从这里开始",
+    marquee: "欢迎来到云端导航！☆ 上网冲浪，从 YES 开始 ☆ 今天也是元气满满的一天！",
+    counter: (n: number) => `您是第 ${n} 位访客`,
+    sections: [
+      {
+        name: "本站推荐",
+        links: [
+          { label: "WeatherCore 的个人主页", desc: "站长的家，建设中但很温馨", to: "home", hide: false },
+          { label: "云端留言板", desc: "踩一脚再走，文明上网", to: "guestbook", hide: false },
+        ],
+      },
+      {
+        name: "实用工具",
+        links: [
+          { label: "搜一搜", desc: "搜什么都有，就是不太对", to: "search", hide: true },
+          { label: "1998 新闻中心", desc: "大事小事，真假难辨", to: "news", hide: true },
+        ],
+      },
+    ],
+    footer: "本站最佳分辨率 800×600 · 建议 Netscape 4.0 / Internet Explorer 4.0 以上浏览",
+  },
+
+  /* ---- WeatherCore 的个人主页 ---- */
+  home: {
+    url: "weathercore.yes",
+    title: "★ WeatherCore 的家 ★",
+    marquee: "欢迎欢迎热烈欢迎！这里是 WeatherCore 的小窝，随便看，别客气，记得去留言板踩一脚~",
+    constructing: "本主页正在建设中，预计完工时间：待定",
+    constructingSub: "（从 1998 年开工至今，热情从未减退）",
+    counter: (n: number) => `您是第 ${n} 位贵客`,
+    sectionsTitle: "· 自我介绍 ·",
+    profileTitle: "· 个人档案 ·",
+    mottoTitle: "· 今日座右铭 ·",
+    linksTitle: "· 友情链接 ·",
+    links: [
+      { label: "云端导航", to: "nav" },
+      { label: "云端留言板", to: "guestbook" },
+      { label: "1998 新闻中心", to: "news" },
+    ],
+    mail: "给我写信",
+    mailHint: "weathercore@cloud1998.yes\n\n邮局还没通网，信鸽正在培训中。\n（要不您去留言板留个言？）",
+    sound: "背景音乐：开",
+    soundHint:
+      "对不起，站长还没攒够钱买声卡。\n（1998 年，一块好声卡真的要小两百块）\n\n你可以对着屏幕哼。",
+  },
+
+  /* ---- 留言板 ---- */
+  guestbook: {
+    url: "cloud1998.yes/guestbook",
+    title: "云端留言板",
+    intro: "来都来了，留个脚印再走。灌水可以，灌鸡汤不行。",
+    nick: "昵称：",
+    nickDefault: "无名氏",
+    placeholder: "写点什么吧...（限 100 字）",
+    submit: "留下脚印",
+    empty: "还没有人留言。第一个脚印就是你的了。",
+    thanks: "脚印已留下。文明上网，人人有责。",
+    seed: [
+      { name: "系统管理员", date: "1998-01-01", text: "欢迎使用云端1998留言板。文明上网，人人有责。" },
+      { name: "网吧大神", date: "1998-06-13", text: "站长主页做得真好！友情链接已做好，常来踩踩~" },
+      { name: "隔壁老王", date: "1998-07-02", text: "比隔壁二狗的主页强多了。就是背景音乐怎么没有？" },
+      { name: "OICQ_888888", date: "1998-08-01", text: "加我OICQ！一起聊《还珠格格》，小燕子太可爱了~" },
+      { name: "路过的小恐龙", date: "1998-09-15", text: "灌水~ 灌水~ ヾ(≧▽≦*)o" },
+      { name: "猫猫爱吃鱼", date: "1998-11-20", text: "踩踩踩！回访必踩！也欢迎来我的「猫咪小窝」（还在建设中）" },
+    ],
+  },
+
+  /* ---- 搜一搜（藏在角落的彩蛋） ---- */
+  search: {
+    url: "so.yes",
+    title: "搜一搜 - 搜什么都有，就是不太对",
+    brand: "搜一搜",
+    slogan: "搜一搜，不知道",
+    placeholder: "想知道点什么？",
+    button: "搜一下",
+    hits: (q: string, n: number) =>
+      `找到约 ${n} 条与「${q}」相关的结果（用时 0.000${1 + Math.floor(Math.random() * 9)} 秒）`,
+    gugu: [
+      {
+        title: "云咕咕 - 搜一搜百科",
+        url: "baike.yes/wiki/云咕咕",
+        snippet: "一只住在 WeatherCore 电脑桌面上的鸡。爱好：啄米、下蛋、被踢飞。",
+        to: null,
+      },
+      {
+        title: "为什么我同事的电脑屏幕上有一只鸡？- 搜一搜知道",
+        url: "zhidao.yes/q/鸡",
+        snippet: "最佳答案：那是站长的宠物，喂它吃谷粒会下蛋。别踢它，会生气。",
+        to: null,
+      },
+    ],
+    eggDetector: (found: number) =>
+      `彩蛋探测器 v0.98 运行中：你已经发现 ${found} 个彩蛋。总数嘛……编辑自己也数不太清（反正 ≥ 10）。`,
+    weather: [
+      {
+        title: "WeatherCore 天气 - 今日多云转晴",
+        url: "weather.yes/wc",
+        snippet: "适合写代码。紫外线指数：低（毕竟很少出门）。",
+        to: null,
+      },
+    ],
+    answer42: "答案是 42。\n但你先得想清楚，你问的到底是什么。",
+    defaults: (q: string) => [
+      {
+        title: `${q} - 搜一搜百科`,
+        url: `baike.yes/wiki/${q}`,
+        snippet: `关于「${q}」的词条正在编写中，编写者吃饭去了。`,
+        to: null,
+      },
+      {
+        title: `${q}的最新消息_资讯`,
+        url: `news.yes/search?w=${q}`,
+        snippet: "1998 年还没有算法推荐，翻页请自带耐心。",
+        to: "news",
+      },
+      {
+        title: `谁知道${q}怎么办？急！在线等 - 搜一搜知道`,
+        url: `zhidao.yes/q/${q}`,
+        snippet: "楼主别急，先喝口水。热心的网友正在赶来的路上（56K）。",
+        to: null,
+      },
+      {
+        title: `${q} 相关下载（高速通道）`,
+        url: `dl.yes/${q}.zip`,
+        snippet: "预计剩余时间：47 小时。请勿挂断电话。",
+        to: null,
+      },
+    ],
+  },
+
+  /* ---- 1998 新闻中心（藏在角落的彩蛋） ---- */
+  news: {
+    url: "news.yes",
+    title: "1998 新闻中心",
+    dateline: "1998 年 12 月 31 日 · 星期四 · 总第 1998 期",
+    motto: "记录时代风云，也记录一点点胡说八道",
+    items: [
+      {
+        date: "1998-07-12",
+        title: "法国世界杯落幕，东道主 3:0 捧起大力神杯",
+        body: "齐达内两记头球定乾坤。熬夜看球的同学们，明天早八请自重。",
+      },
+      {
+        date: "1998-08-28",
+        title: "长江抗洪取得全面胜利",
+        body: "军民同心，严防死守。向最可爱的人致敬。",
+      },
+      {
+        date: "1998-09-01",
+        title: "《还珠格格》收视创纪录",
+        body: "大街小巷都在放《当》。遥控器仿佛失去了换台的功能。",
+      },
+      {
+        date: "1998-09-14",
+        title: "微软正式发布 Windows 98",
+        body: "装完之后，C 盘居然还能剩下两百多兆，令人震惊。",
+      },
+      {
+        date: "1998-10-08",
+        title: "本地程序员宣布「再改最后一个 Bug」",
+        body: "专家提醒：按历史经验，「最后一个」通常后面还排着三到五个。",
+        fake: true,
+      },
+      {
+        date: "1998-11-11",
+        title: "研究发现：程序员与咖啡存在量子纠缠",
+        body: "观察一杯咖啡的坍缩状态，将直接影响当天下午的代码质量。论文已投《云端物理学报》。",
+        fake: true,
+      },
+      {
+        date: "1998-12-24",
+        title: "气象台：明日天气晴，适合写代码",
+        body: "本台特别提醒 WeatherCore 同学：晴天的代码 Bug 率下降约 3%。（云传感器独家供图）",
+        fake: true,
+      },
+    ],
+    fakeTag: "恶搞",
+  },
+
+  /* ---- 打不开的页面 ---- */
+  notFound: {
+    title: "该页无法显示",
+    heading: "HTTP 404 - 该页无法显示",
+    body: [
+      "您寻找的页面当前不可用。网站可能遇到技术问题，或者您需要调整浏览器设置。",
+      "",
+      "请尝试以下操作：",
+      "· 单击「刷新」按钮，或稍后重试；",
+      "· 检查地址栏有没有拼错字；",
+      "· 如果您确实想访问真实的互联网——",
+      "  很遗憾，这台电脑的网线在 1998 年就拔了。",
+    ],
+    footer: "Internet Explorer（云端版）",
+  },
+  offline: {
+    title: "无法建立连接",
+    heading: "无法建立连接 - 没有调制解调器",
+    body: (url: string) => [
+      `无法连接到 ${url}。`,
+      "",
+      "原因很简单：这台电脑没有连接电话线。",
+      "56K 猫虽然就位，但 1998 年的电话费按分钟计费，",
+      "站长深思熟虑之后，决定让整个互联网都住在本地。",
+      "",
+      "试试在地址栏输入 cloud1998.yes，那是自家地盘。",
+    ],
+    footer: "拨号网络（从未成功过）",
+  },
+};
