@@ -24,6 +24,32 @@ export const isMobile = () =>
 export const reducedMotion = () =>
   matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* localStorage 安全包装：禁用站点数据的浏览器里读写会抛
+   SecurityError，一律静默降级（读为 null，写丢弃），不能让整站白屏 */
+export const store = {
+  get(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* 存不进去就算了 */
+    }
+  },
+  remove(key: string): void {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* 同上 */
+    }
+  },
+};
+
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export const clamp = (v: number, min: number, max: number) =>
