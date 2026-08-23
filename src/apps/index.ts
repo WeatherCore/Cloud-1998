@@ -5,8 +5,12 @@ import { aboutApp } from "./about";
 import { githubApp } from "./github";
 import { paintApp } from "./paint";
 import { snakeApp } from "./snake";
+import { mineApp } from "./mine";
+import { calcApp } from "./calc";
+import { ieApp } from "./ie";
 import { terminalApp } from "./terminal";
 import { notepadApp } from "./notepad";
+import { achApp } from "./ach";
 import { binApp, binFileApp } from "./bin";
 import { displayApp } from "./display";
 import { docsApp, projectApp } from "./docs";
@@ -15,10 +19,14 @@ export const APPS: AppDef[] = [
   githubApp,
   aboutApp,
   docsApp,
+  ieApp,
   paintApp,
   snakeApp,
+  mineApp,
+  calcApp,
   terminalApp,
   notepadApp,
+  achApp,
   binApp,
   binFileApp,
   displayApp,
@@ -30,10 +38,14 @@ export const DESKTOP_ICONS = [
   "github",
   "about",
   "docs",
+  "ie",
   "paint",
   "snake",
+  "mine",
+  "calc",
   "terminal",
   "notepad",
+  "ach",
   "bin",
 ];
 
