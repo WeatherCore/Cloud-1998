@@ -2,11 +2,12 @@
 
 import { iconURL } from "../ui/pixel";
 import { BOOT_LINES, SITE, SPLASH_SUB } from "./content";
-import { el, rand, reducedMotion, sleep } from "./util";
+import { sound } from "./sound";
+import { el, rand, reducedMotion, sleep, store } from "./util";
 
 export function runBoot(onDone: () => void) {
   /* 回访或系统开启减少动态：快进 */
-  const fast = localStorage.getItem("wc98-booted") === "1" || reducedMotion();
+  const fast = store.get("wc98-booted") === "1" || reducedMotion();
 
   const boot = el("div");
   boot.id = "boot";
@@ -58,12 +59,14 @@ export function runBoot(onDone: () => void) {
     splash.classList.add("show");
     await sleep(skipped ? 300 : 2400);
 
-    localStorage.setItem("wc98-booted", "1");
+    store.set("wc98-booted", "1");
     document.removeEventListener("pointerdown", skipNow);
     document.removeEventListener("keydown", skipNow);
     boot.remove();
     splash.remove();
     skip.remove();
+    /* 桌面亮起的瞬间，一声合成和弦送它出场 */
+    sound.chord();
     onDone();
   })();
 }
