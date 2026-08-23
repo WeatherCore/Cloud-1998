@@ -5,6 +5,7 @@
 import { GLYPHS, iconEl, iconURL } from "../ui/pixel";
 import { buildMenubar } from "../ui/menubar";
 import type { AppCtx, AppDef } from "./types";
+import { sound } from "./sound";
 import { $, clamp, el, isMobile } from "./util";
 
 const TASKBAR_H = 30;
@@ -148,6 +149,14 @@ class WindowManager {
       bMax.style.display = "none";
     }
     this.enableDrag(inst, tb);
+    if (!mobile) {
+      this.enableResize(inst);
+      /* 双击标题栏最大化/还原（按钮区域除外） */
+      tb.addEventListener("dblclick", (e) => {
+        if ((e.target as HTMLElement).closest(".tbtn")) return;
+        this.toggleMax(inst);
+      });
+    }
 
     const handle: WinHandle = {
       el: win,
@@ -169,6 +178,9 @@ class WindowManager {
     }
     inst.cleanup = app.build(ctx) ?? undefined;
     this.focus(inst);
+    /* 开窗音：普通窗口「嗒」，对话框「叮」 */
+    if (isDialog) sound.ding();
+    else sound.tick();
     return inst;
   }
 
@@ -201,6 +213,64 @@ class WindowManager {
     const stop = () => (dragging = false);
     tb.addEventListener("pointerup", stop);
     tb.addEventListener("pointercancel", stop);
+  }
+
+  /* ---------- 缩放 ---------- */
+
+  /** 八向缩放手柄（四边 + 四角），Pointer Capture 驱动；最大化时隐藏 */
+  private enableResize(inst: WinInst) {
+    const MIN_W = 220;
+    const MIN_H = 150;
+    (["n", "s", "e", "w", "ne", "nw", "se", "sw"] as const).forEach((dir) => {
+      const h = el("div", `w98-rz rz-${dir}`);
+      inst.el.appendChild(h);
+      let on = false;
+      let sx = 0;
+      let sy = 0;
+      let sl = 0;
+      let st = 0;
+      let sw = 0;
+      let sh = 0;
+      h.addEventListener("pointerdown", (e) => {
+        if (inst.maximized) return;
+        on = true;
+        sx = e.clientX;
+        sy = e.clientY;
+        sl = inst.el.offsetLeft;
+        st = inst.el.offsetTop;
+        sw = inst.el.offsetWidth;
+        sh = inst.el.offsetHeight;
+        h.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      h.addEventListener("pointermove", (e) => {
+        if (!on) return;
+        const dx = e.clientX - sx;
+        const dy = e.clientY - sy;
+        let w = sw;
+        let hh = sh;
+        if (dir.includes("e")) w = Math.max(MIN_W, sw + dx);
+        if (dir.includes("s")) hh = Math.max(MIN_H, sh + dy);
+        if (dir.includes("w")) w = Math.max(MIN_W, sw - dx);
+        if (dir.includes("n")) hh = Math.max(MIN_H, sh - dy);
+        /* 左上两个方向：锚住右下角反推位置，并保证标题栏不被拖出屏幕 */
+        let l = dir.includes("w") ? sl + (sw - w) : sl;
+        let t = dir.includes("n") ? st + (sh - hh) : st;
+        l = clamp(l, -w + 60, innerWidth - 60);
+        t = clamp(t, 0, innerHeight - TASKBAR_H - 24);
+        w = Math.min(w, innerWidth - l);
+        hh = Math.min(hh, innerHeight - TASKBAR_H - t);
+        Object.assign(inst.el.style, {
+          left: `${l}px`,
+          top: `${t}px`,
+          width: `${w}px`,
+          height: `${hh}px`,
+        });
+      });
+      const stop = () => (on = false);
+      h.addEventListener("pointerup", stop);
+      h.addEventListener("pointercancel", stop);
+    });
   }
 
   /* ---------- 状态 ---------- */
@@ -241,6 +311,7 @@ class WindowManager {
         height: "100%",
       });
       inst.maximized = true;
+      inst.el.classList.add("maximized");
       inst.btnMax.innerHTML = GLYPHS.restore;
     } else if (inst.prev) {
       Object.assign(inst.el.style, {
@@ -250,11 +321,13 @@ class WindowManager {
         height: `${inst.prev.h}px`,
       });
       inst.maximized = false;
+      inst.el.classList.remove("maximized");
       inst.btnMax.innerHTML = GLYPHS.max;
     }
   }
 
   close(inst: WinInst) {
+    sound.tick();
     try {
       inst.cleanup?.();
     } catch {
