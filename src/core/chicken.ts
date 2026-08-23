@@ -12,8 +12,9 @@
 
 import { GUGU } from "./content";
 import { showBalloon } from "./shell";
+import { stats } from "./stats";
 import { iconEl } from "../ui/pixel";
-import { clamp, el, rand } from "./util";
+import { clamp, el, rand, store } from "./util";
 import { wm } from "./wm";
 
 const SHEET = `${import.meta.env.BASE_URL}sprites/gugu.png`;
@@ -118,13 +119,13 @@ const LS_MUTED = "gugu-muted";
 const LS_EGGS = "gugu-eggs";
 const LS_CHICKS = "gugu-chicks";
 const LS_MET = "gugu-met";
-let muted = localStorage.getItem(LS_MUTED) === "1";
-let eggCount = Number(localStorage.getItem(LS_EGGS) ?? 0) || 0;
-let hatchedCount = Number(localStorage.getItem(LS_CHICKS) ?? 0) || 0;
-let metAt = Number(localStorage.getItem(LS_MET) ?? 0);
+let muted = store.get(LS_MUTED) === "1";
+let eggCount = Number(store.get(LS_EGGS) ?? 0) || 0;
+let hatchedCount = Number(store.get(LS_CHICKS) ?? 0) || 0;
+let metAt = Number(store.get(LS_MET) ?? 0);
 if (!metAt) {
   metAt = Date.now();
-  localStorage.setItem(LS_MET, String(metAt));
+  store.set(LS_MET, String(metAt));
 }
 
 /* ---------- 音效：WebAudio 现场合成，零音频文件 ---------- */
@@ -530,7 +531,8 @@ function hatchEgg() {
   spawnChick(eggX);
   setMood("hatched");
   hatchedCount += 1;
-  localStorage.setItem(LS_CHICKS, String(hatchedCount));
+  store.set(LS_CHICKS, String(hatchedCount));
+  stats.once("gugu.hatch");
   showBalloon(hatchedCount === 1 ? GUGU.firstChick : GUGU.secondChick);
   scheduleNextEgg();
 }
@@ -546,7 +548,8 @@ function collectEgg() {
   eggEl = null;
   eggHatchAt = 0;
   eggCount += 1;
-  localStorage.setItem(LS_EGGS, String(eggCount));
+  store.set(LS_EGGS, String(eggCount));
+  stats.bump("gugu.eggs");
   popSnd();
   burst(r.left, r.top);
   floatText("+1", r.left, r.top - 10);
@@ -683,6 +686,7 @@ function dizzyLand() {
 
 function kickStart(vx0: number, vy0: number) {
   state = "kick";
+  stats.once("gugu.kick");
   vx = clamp(vx0, -1500, 1500);
   vy = clamp(vy0, -1200, 800);
   if (Math.abs(vy) < 150) vy = -250; /* 平甩也带一点抛物弧线 */
@@ -907,74 +911,67 @@ function startTick() {
 
 /* ---------- 交互 ---------- */
 
-function bindEvents() {
-  if (!root) return;
-  const r = root;
-  const press = { id: -1, x: 0, y: 0, t: 0, moved: false };
-  /* 部分内嵌浏览器只派发鼠标事件不派发 pointer 事件：
-     见过真的 pointerdown 之后，鼠标兜底通道永久退位，避免双触发 */
-  let pointerLive = false;
+/* 拖拽会话状态挂在模块层：document 级监听只绑一次，
+   鸡被放生再召回也不会重复累积监听器和游离 DOM */
+const press = { id: -1, x: 0, y: 0, t: 0, moved: false };
+/* 部分内嵌浏览器只派发鼠标事件不派发 pointer 事件：
+   见过真的 pointerdown 之后，鼠标兜底通道永久退位，避免双触发 */
+let pointerLive = false;
+/* 甩击判定用：保留最近两次 move 的位置与时间 */
+let pv = { x: 0, y: 0, t: 0 };
+let lv = { x: 0, y: 0, t: 0 };
 
-  const begin = (cx: number, cy: number) => {
-    press.id = 1;
-    press.x = cx;
-    press.y = cy;
-    press.t = performance.now();
-    press.moved = false;
-    interact();
-  };
-  /* 甩击判定用：保留最近两次 move 的位置与时间 */
-  let pv = { x: 0, y: 0, t: 0 };
-  let lv = { x: 0, y: 0, t: 0 };
+function begin(cx: number, cy: number) {
+  press.id = 1;
+  press.x = cx;
+  press.y = cy;
+  press.t = performance.now();
+  press.moved = false;
+  interact();
+}
 
-  const move = (cx: number, cy: number) => {
-    if (!press.moved && Math.hypot(cx - press.x, cy - press.y) > 7) {
-      press.moved = true;
-      if (state !== "gone" && state !== "leave") {
-        state = "carried";
-        mount(true);
-        cluck();
-      }
-    }
-    if (press.moved && state === "carried") {
-      x = clamp(cx - CELL / 2, -20, innerWidth - CELL / 2);
-      y = clamp(cy - CELL * 0.9, 0, innerHeight - 40);
-      applyPos(); /* 逐事件贴住光标，不等 80ms tick */
-      pv = lv;
-      lv = { x: cx, y: cy, t: performance.now() };
-    }
-  };
-  const end = () => {
-    press.id = -1;
-    if (state === "carried") {
-      /* 松手瞬间手速决定轻重：慢放 = 扑翅缓降，快甩 = 踢飞 */
-      const dt = lv.t - pv.t;
-      const vx0 = dt > 2 ? ((lv.x - pv.x) / dt) * 1000 : 0;
-      const vy0 = dt > 2 ? ((lv.y - pv.y) / dt) * 1000 : 0;
-      if (Math.hypot(vx0, vy0) > KICK_V) kickStart(vx0, vy0);
-      else {
-        state = "fall";
-        vy = 0;
-        startRaf();
-      }
-    } else if (!press.moved && performance.now() - press.t < 400) {
-      /* 轻点：咕咕叫 + 冒爱心 */
+function move(cx: number, cy: number) {
+  if (!press.moved && Math.hypot(cx - press.x, cy - press.y) > 7) {
+    press.moved = true;
+    if (state !== "gone" && state !== "leave") {
+      state = "carried";
+      mount(true);
       cluck();
-      hearts(3);
     }
-  };
+  }
+  if (press.moved && state === "carried") {
+    x = clamp(cx - CELL / 2, -20, innerWidth - CELL / 2);
+    y = clamp(cy - CELL * 0.9, 0, innerHeight - 40);
+    applyPos(); /* 逐事件贴住光标，不等 80ms tick */
+    pv = lv;
+    lv = { x: cx, y: cy, t: performance.now() };
+  }
+}
 
-  r.addEventListener("pointerdown", (e) => {
-    pointerLive = true;
-    /* 屏保运行时不拦截冒泡：让屏保自己听到这次点击并退出 */
-    if (!document.getElementById("saver")) e.stopPropagation();
-    begin(e.clientX, e.clientY);
-    try {
-      r.setPointerCapture(e.pointerId);
-    } catch {
-      /* 合成输入可能拿不到有效指针 ID，兜底通道会接手 */
+function end() {
+  press.id = -1;
+  if (state === "carried") {
+    /* 松手瞬间手速决定轻重：慢放 = 扑翅缓降，快甩 = 踢飞 */
+    const dt = lv.t - pv.t;
+    const vx0 = dt > 2 ? ((lv.x - pv.x) / dt) * 1000 : 0;
+    const vy0 = dt > 2 ? ((lv.y - pv.y) / dt) * 1000 : 0;
+    if (Math.hypot(vx0, vy0) > KICK_V) kickStart(vx0, vy0);
+    else {
+      state = "fall";
+      vy = 0;
+      startRaf();
     }
-  });
+  } else if (!press.moved && performance.now() - press.t < 400) {
+    /* 轻点：咕咕叫 + 冒爱心 */
+    cluck();
+    hearts(3);
+  }
+}
+
+let docEventsBound = false;
+function bindDocEvents() {
+  if (docEventsBound) return;
+  docEventsBound = true;
   /* 拖拽跟踪挂 document 而不是鸡身上：carry 开始时元素要换父节点
      挂到 body（浮到窗口之上），Chrome 在 reparent 时会释放
      pointer capture，挂在元素级会跟丢快速移动的光标 */
@@ -988,23 +985,41 @@ function bindEvents() {
   document.addEventListener("pointercancel", () => {
     if (press.id !== -1) end();
   });
-
   /* 鼠标事件兜底通道 */
+  document.addEventListener("mousemove", (e) => {
+    if (pointerLive || press.id === -1) return;
+    move(e.clientX, e.clientY);
+  });
+  document.addEventListener("mouseup", () => {
+    if (pointerLive || press.id === -1) return;
+    end();
+  });
+}
+
+function bindEvents() {
+  if (!root) return;
+  const r = root;
+  bindDocEvents();
+  r.addEventListener("pointerdown", (e) => {
+    pointerLive = true;
+    /* 屏保运行时不拦截冒泡：让屏保自己听到这次点击并退出 */
+    if (!document.getElementById("saver")) e.stopPropagation();
+    begin(e.clientX, e.clientY);
+    try {
+      r.setPointerCapture(e.pointerId);
+    } catch {
+      /* 合成输入可能拿不到有效指针 ID，兜底通道会接手 */
+    }
+  });
   r.addEventListener("mousedown", (e) => {
     if (pointerLive || e.button !== 0) return;
     if (!document.getElementById("saver")) e.stopPropagation();
     begin(e.clientX, e.clientY);
   });
-  document.addEventListener("mousemove", (e) => {
-    if (pointerLive || press.id === -1) return;
-    move(e.clientX, e.clientY);
-  });
-  const mouseEnd = () => {
+  r.addEventListener("mouseup", () => {
     if (pointerLive || press.id === -1) return;
     end();
-  };
-  r.addEventListener("mouseup", mouseEnd);
-  document.addEventListener("mouseup", mouseEnd);
+  });
 
   r.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -1034,7 +1049,7 @@ function openMenu(px: number, py: number) {
       label: muted ? GUGU.unmute : GUGU.mute,
       action: () => {
         muted = !muted;
-        localStorage.setItem(LS_MUTED, muted ? "1" : "0");
+        store.set(LS_MUTED, muted ? "1" : "0");
         if (!muted) cluck();
       },
     },
@@ -1093,6 +1108,11 @@ function spawn() {
   state = "enter";
   stateT = 0;
   onTop = false;
+  /* 新生命周期：清掉上一世残留的拖拽会话（等价于旧版重建闭包） */
+  press.id = -1;
+  press.moved = false;
+  pv = { x: 0, y: 0, t: 0 };
+  lv = { x: 0, y: 0, t: 0 };
   lastInteract = performance.now();
   nextCluckAt = lastInteract + 20_000;
   layDueAt = lastInteract + 150_000 + rand(90_000); /* 第一颗蛋 2.5-4 分钟 */
@@ -1130,7 +1150,7 @@ export function releaseGugu() {
   setDir(x < innerWidth / 2 ? -1 : 1);
   state = "leave";
   stateT = 0;
-  localStorage.setItem(LS_RELEASED, "1");
+  store.set(LS_RELEASED, "1");
 }
 
 /** 在鸡身边撒一把谷粒（喂食） */
@@ -1143,7 +1163,7 @@ export function feedGugu() {
 /** 终端命令入口：召回或回应 */
 export function summonGugu(): string {
   if (state === "gone") {
-    localStorage.removeItem(LS_RELEASED);
+    store.remove(LS_RELEASED);
     spawn();
     startTick();
     return GUGU.termRecall;
@@ -1155,7 +1175,7 @@ export function summonGugu(): string {
 }
 
 export function initGugu() {
-  if (localStorage.getItem(LS_RELEASED) === "1") return;
+  if (store.get(LS_RELEASED) === "1") return;
   /* 桌面就绪后 1 秒，云咕咕从屏幕左缘走进来 */
   window.setTimeout(() => {
     spawn();
